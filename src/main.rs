@@ -1,8 +1,4 @@
-
-mod chip8;
-pub use crate::chip8::CPU;
-pub use crate::chip8::Opcode;
-
+use rustchip8::CPU;
 
 fn main() {
     println!("Hello, world!");
