@@ -29,7 +29,7 @@ impl Opcode {
         ((self.op & 0xFF)).try_into().unwrap()
     }
     pub fn nnn(&self) -> u16 {
-        ((self.op & 0xFFF) >> 2).try_into().unwrap()
+        ((self.op & 0xFFF)).try_into().unwrap()
     }
 }
 
