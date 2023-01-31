@@ -1,5 +1,4 @@
 mod peripherals;
-use peripherals::test;
 use peripherals::Peripherals;
 
 use std::fs::File;
@@ -50,16 +49,15 @@ impl CPU {
             pc: 0x200,
             i: 0,
             v: Vec::new(),
-            memory: Vec::with_capacity(4096),
+            memory: vec![0; 4096],
             stack: Vec::new(),
             delay_timer: 0,
             sound_timer: 0,
-            peripherals: Peripherals{test: 1},
+            peripherals: Peripherals::new(),
         }
     }
 
     pub fn read_program(&mut self, filepath: String) -> std::result::Result<(), String> {
-        test();
         let mut buffer = Vec::<u8>::new();
         match File::open(filepath) {
             Ok(mut file) => {
