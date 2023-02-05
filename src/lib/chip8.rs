@@ -48,13 +48,18 @@ impl CPU {
         CPU {
             pc: 0x200,
             i: 0,
-            v: Vec::new(),
+            v: vec![0; 16],
             memory: vec![0; 4096],
             stack: Vec::new(),
             delay_timer: 0,
             sound_timer: 0,
             peripherals: Peripherals::new(),
         }
+    }
+
+    pub fn get_byte(&self, n: u8, sprite: u8) -> bool {
+        let mask: u8 = 1 << (7 - n);
+        return (sprite & mask) > 0;
     }
 
     /// Reads a program from filepath to memory.
@@ -141,11 +146,23 @@ impl CPU {
     }
 
     fn op_0x0(&mut self, opcode: Opcode) {
+        match opcode.nn() {
+            0xE0 => {
+                self.peripherals.clear();
+            }
+            0x0..=0xDF => {
+                println!("Not implemented")
+            }
+            0xE1..=u8::MAX => {
+
+            }
+        }
         println!("OP code: {}", opcode.opcode());
     }
     fn op_0x1(&mut self, opcode: Opcode) {
-        println!("OP code: {}", opcode.opcode());
+        self.pc = opcode.nnn() as usize;
     }
+
     fn op_0x2(&mut self, opcode: Opcode) {
         println!("OP code: {}", opcode.opcode());
     }
@@ -159,10 +176,10 @@ impl CPU {
         println!("OP code: {}", opcode.opcode());
     }
     fn op_0x6(&mut self, opcode: Opcode) {
-        println!("OP code: {}", opcode.opcode());
+        self.v[opcode.x() as usize] = opcode.nn();
     }
     fn op_0x7(&mut self, opcode: Opcode) {
-        println!("OP code: {}", opcode.opcode());
+        self.v[opcode.x() as usize] += opcode.nn();
     }
     fn op_0x8(&mut self, opcode: Opcode) {
         println!("OP code: {}", opcode.opcode());
@@ -171,7 +188,7 @@ impl CPU {
         println!("OP code: {}", opcode.opcode());
     }
     fn op_0xa(&mut self, opcode: Opcode) {
-        println!("OP code: {}", opcode.opcode());
+        self.i = opcode.nnn();
     }
     fn op_0xb(&mut self, opcode: Opcode) {
         println!("OP code: {}", opcode.opcode());
@@ -180,8 +197,20 @@ impl CPU {
         println!("OP code: {}", opcode.opcode());
     }
     fn op_0xd(&mut self, opcode: Opcode) {
-        println!("OP code: {}", opcode.opcode());
+        let x: usize = (self.v[opcode.x() as usize] % 64) as usize;
+        let y: usize = (self.v[opcode.y() as usize] % 32) as usize;
+        self.v[0xF] = 0;
+
+        for i in 0..opcode.n() {
+            let sprite: u8 = self.memory[((self.i as usize) + i as usize)];
+            for n in 0..8 {
+                if self.get_byte(n, sprite) {
+                    self.v[0xF] = self.peripherals.flip(x + n as usize, y + i as usize) as u8;
+                }
+            }
+        }
     }
+
     fn op_0xe(&mut self, opcode: Opcode) {
         println!("OP code: {}", opcode.opcode());
     }

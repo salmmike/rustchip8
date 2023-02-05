@@ -1,5 +1,6 @@
 use piston::{EventLoop, UpdateEvent, RenderEvent};
 use rustchip8::{CPU, Opcode};
+use std::env;
 
 extern crate glutin_window;
 extern crate graphics;
@@ -11,18 +12,27 @@ use opengl_graphics::{OpenGL, GlGraphics};
 
 fn main() {
     let mut cpu: CPU = CPU::new();
-    let mut gl: GlGraphics = GlGraphics::new(OpenGL::V3_2);
+    let opengl = OpenGL::V3_2;
 
     let pixel_size = 10;
     let mut window: PistonWindow = WindowSettings::new(
             "rust-chip8",
             [(cpu.peripherals.width * pixel_size) as f64, (cpu.peripherals.height * pixel_size) as f64]
         )
+        .graphics_api(opengl)
         .exit_on_esc(true)
         .build()
         .unwrap();
 
-        let mut events = Events::new(EventSettings::new()).ups(700);
+        if env::args().len() >= 2 {
+            let args = env::args();
+            let arg = args.last().unwrap();
+            cpu.read_program(arg).expect("Error");
+        }
+
+        let mut gl: GlGraphics = GlGraphics::new(OpenGL::V3_2);
+
+        let mut events = Events::new(EventSettings::new()).ups(10);
 
         while let Some(e) = events.next(&mut window) {
             if let Some(ref _args) = e.update_args() {
@@ -31,7 +41,7 @@ fn main() {
             }
 
             if let Some(ref args) = e.render_args() {
-               cpu.peripherals.draw(args, &mut gl);
+                cpu.peripherals.draw(args, &mut gl);
             }
         }
 }

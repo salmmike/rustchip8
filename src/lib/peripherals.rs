@@ -29,15 +29,17 @@ impl Peripherals {
         let pixel_height = c.get_view_size()[1] as usize / self.height;
         for x in 0..self.width {
             for y in 0..self.height {
-                Rectangle::new([1.0, 1.0, 1.0, 1.0])
-                    .draw(rectangle::rectangle_by_corners((x*pixel_width) as f64,
-                                                                (y*pixel_height) as f64,
-                                                                (x*pixel_width + pixel_width) as f64,
-                                                                (y*pixel_height + pixel_height) as f64),
-                        &DrawState::default(),
-                        c.transform,
-                        gl
-                    )
+                if self.grid[x][y] {
+                    Rectangle::new([1.0, 1.0, 1.0, 1.0])
+                        .draw(rectangle::rectangle_by_corners((x*pixel_width) as f64,
+                                                                    (y*pixel_height) as f64,
+                                                                    (x*pixel_width + pixel_width) as f64,
+                                                                    (y*pixel_height + pixel_height) as f64),
+                            &DrawState::default(),
+                            c.transform,
+                            gl
+                        )
+                }
             }
         }
     }
@@ -48,6 +50,14 @@ impl Peripherals {
             clear([0.0, 0.0, 0.0, 1.0], gl);
             self.draw_grid(gl, c);
         });
+    }
+
+    pub fn clear(&mut self) {
+        for x in 0..self.width {
+            for y in 0..self.height {
+                self.grid[x][y] = false;
+            }
+        }
     }
 
     pub fn flip(&mut self, x: usize, y: usize) -> bool {
