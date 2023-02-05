@@ -32,7 +32,7 @@ fn main() {
 
         let mut gl: GlGraphics = GlGraphics::new(OpenGL::V3_2);
 
-        let mut events = Events::new(EventSettings::new()).ups(10);
+        let mut events = Events::new(EventSettings::new()).ups(700);
 
         while let Some(e) = events.next(&mut window) {
             if let Some(ref _args) = e.update_args() {
