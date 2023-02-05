@@ -90,6 +90,15 @@ impl CPU {
         (((a as i16 - b as i16)) & (0xFF)) as u8
     }
 
+    pub fn deincrement_timers(&mut self) {
+        if self.delay_timer > 0 {
+            self.delay_timer -= 1;
+        }
+        if self.sound_timer > 0 {
+            self.sound_timer -= 1;
+        }
+    }
+
     /// Fetch the next Opcode and increment program counter.
     pub fn fetch(&mut self) -> Opcode {
         let op = Opcode{op: ((self.memory[self.pc] as u16) << 8) | (self.memory[self.pc+1] as u16)};
@@ -290,7 +299,45 @@ impl CPU {
     }
 
     fn op_0xf(&mut self, opcode: Opcode) {
-        println!("OP code: {}", opcode.opcode());
+        match opcode.nn() {
+            0x07 => {
+                self.v[opcode.x()] = self.delay_timer;
+            }
+            0x15 => {
+                self.delay_timer = self.v[opcode.x()];
+            }
+            0x18 => {
+                self.sound_timer = self.v[opcode.x()];
+            }
+            0x1E => {
+                self.i += self.v[opcode.x()] as u16;
+            }
+            0x0A => {
+                println!("Not implemented")
+            }
+            0x29 => {
+                self.i = (0x50 + opcode.x() * 5).try_into().unwrap();
+            }
+
+            0x33 => {
+                self.memory[(self.i + 2) as usize] = (self.v[opcode.x()] % 10) as u8;
+                self.memory[(self.i + 1) as usize] = ((self.v[opcode.x()] / 10) % 10) as u8;
+                self.memory[(self.i + 0) as usize] = ((self.v[opcode.x()] / 100) % 10) as u8;
+            }
+            0x55 => {
+                for i in 0..=opcode.x() {
+                    self.memory[self.i as usize + i] = self.v[i];
+                }
+            }
+            0x65 => {
+                for i in 0..=opcode.x() {
+                    self.v[i] = self.memory[self.i as usize + i];
+                }
+            }
+            _ => {
+                println!("Not implemented")
+            }
+        }
     }
 
 

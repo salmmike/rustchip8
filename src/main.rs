@@ -32,9 +32,19 @@ fn main() {
 
         let mut gl: GlGraphics = GlGraphics::new(OpenGL::V3_2);
 
-        let mut events = Events::new(EventSettings::new()).ups(700);
+        let fps = 700;
+
+        let mut events = Events::new(EventSettings::new()).ups(fps);
+        let mut i: u64 = 0;
 
         while let Some(e) = events.next(&mut window) {
+            i += 1;
+
+            if i >= fps/60 {
+                i = 0;
+                cpu.deincrement_timers();
+
+            }
             if let Some(ref _args) = e.update_args() {
                 let opcode: Opcode = cpu.fetch();
                 cpu.execute(opcode);
