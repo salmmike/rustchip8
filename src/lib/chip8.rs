@@ -14,11 +14,11 @@ impl Opcode {
         ((self.op & 0xF000) >> 12).try_into().unwrap()
     }
 
-    pub fn x(&self) -> u8 {
+    pub fn x(&self) -> usize {
         ((self.op & 0x0F00) >> 8).try_into().unwrap()
     }
 
-    pub fn y(&self) -> u8 {
+    pub fn y(&self) -> usize {
         ((self.op & 0xF0) >> 4).try_into().unwrap()
     }
     pub fn n(&self) -> u8 {
@@ -177,74 +177,74 @@ impl CPU {
     }
 
     fn op_0x3(&mut self, opcode: Opcode) {
-        if self.v[opcode.x() as usize] == opcode.nn() {
+        if self.v[opcode.x()] == opcode.nn() {
             self.pc += 2;
         }
     }
 
     fn op_0x4(&mut self, opcode: Opcode) {
-        if self.v[opcode.x() as usize] != opcode.nn() {
+        if self.v[opcode.x()] != opcode.nn() {
             self.pc += 2;
         }
     }
 
     fn op_0x5(&mut self, opcode: Opcode) {
-        if self.v[opcode.x() as usize] == self.v[opcode.y() as usize] {
+        if self.v[opcode.x()] == self.v[opcode.y()] {
             self.pc += 2;
         }
     }
 
     fn op_0x6(&mut self, opcode: Opcode) {
-        self.v[opcode.x() as usize] = opcode.nn();
+        self.v[opcode.x()] = opcode.nn();
     }
 
     fn op_0x7(&mut self, opcode: Opcode) {
-        self.v[opcode.x() as usize] = self.overflow_add(self.v[opcode.x() as usize], opcode.nn());
+        self.v[opcode.x()] = self.overflow_add(self.v[opcode.x()], opcode.nn());
     }
 
     fn op_0x8(&mut self, opcode: Opcode) {
         match opcode.n() {
             0x0 => {
-                self.v[opcode.x() as usize] = self.v[opcode.y() as usize];
+                self.v[opcode.x()] = self.v[opcode.y()];
             }
             0x1 => {
-                self.v[opcode.x() as usize] |= self.v[opcode.y() as usize];
+                self.v[opcode.x()] |= self.v[opcode.y()];
             }
             0x2 => {
-                self.v[opcode.x() as usize] &= self.v[opcode.y() as usize];
+                self.v[opcode.x()] &= self.v[opcode.y()];
             }
             0x3 => {
-                self.v[opcode.x() as usize] ^= self.v[opcode.y() as usize];
+                self.v[opcode.x()] ^= self.v[opcode.y()];
             }
             0x4 => {
-                if self.v[opcode.x() as usize] as u16 + self.v[opcode.y() as usize] as u16 > u8::MAX.into() {
+                if self.v[opcode.x()] as u16 + self.v[opcode.y()] as u16 > u8::MAX.into() {
                     self.v[0xF] = 1;
                 }
-                self.v[opcode.x() as usize] = self.overflow_add(self.v[opcode.x() as usize], self.v[opcode.y() as usize]);
+                self.v[opcode.x()] = self.overflow_add(self.v[opcode.x()], self.v[opcode.y()]);
             }
             0x5 => {
-                if self.v[opcode.x() as usize] > self.v[opcode.y() as usize] {
+                if self.v[opcode.x()] > self.v[opcode.y()] {
                     self.v[0xF] = 1;
                 }
-                self.v[opcode.x() as usize] = self.overflow_subtract( self.v[opcode.x() as usize], self.v[opcode.y() as usize]);
+                self.v[opcode.x()] = self.overflow_subtract( self.v[opcode.x()], self.v[opcode.y()]);
             }
             0x6 => {
-                if self.v[opcode.y() as usize] & 0x1 > 0 {
+                if self.v[opcode.y()] & 0x1 > 0 {
                     self.v[0xF] = 1;
                 }
-                self.v[opcode.y() as usize] = self.v[opcode.y() as usize] >> 1;
+                self.v[opcode.y()] = self.v[opcode.y()] >> 1;
             }
             0x7 => {
-                if self.v[opcode.y() as usize] > self.v[opcode.x() as usize] {
+                if self.v[opcode.y()] > self.v[opcode.x()] {
                     self.v[0xF] = 1;
                 }
-                self.v[opcode.x() as usize] = self.overflow_subtract(self.v[opcode.y() as usize], self.v[opcode.x() as usize]);
+                self.v[opcode.x()] = self.overflow_subtract(self.v[opcode.y()], self.v[opcode.x()]);
             }
             0xE => {
-                if self.v[opcode.y() as usize] & 0b10000000 > 0 {
+                if self.v[opcode.y()] & 0b10000000 > 0 {
                     self.v[0xF] = 1;
                 }
-                self.v[opcode.x() as usize] = self.v[opcode.y() as usize] << 1;
+                self.v[opcode.x()] = self.v[opcode.y()] << 1;
             }
             8_u8..=13_u8 | 15_u8..=u8::MAX => {
                 print!("Unknown command")
@@ -253,7 +253,7 @@ impl CPU {
     }
 
     fn op_0x9(&mut self, opcode: Opcode) {
-        if self.v[opcode.x() as usize] != self.v[opcode.y() as usize] {
+        if self.v[opcode.x()] != self.v[opcode.y()] {
             self.pc += 2;
         }
     }
@@ -271,8 +271,8 @@ impl CPU {
     }
 
     fn op_0xd(&mut self, opcode: Opcode) {
-        let x: usize = (self.v[opcode.x() as usize] % 64) as usize;
-        let y: usize = (self.v[opcode.y() as usize] % 32) as usize;
+        let x: usize = (self.v[opcode.x()] % 64) as usize;
+        let y: usize = (self.v[opcode.y()] % 32) as usize;
         self.v[0xF] = 0;
 
         for i in 0..opcode.n() as usize {
