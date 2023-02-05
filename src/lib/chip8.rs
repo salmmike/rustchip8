@@ -57,6 +57,7 @@ impl CPU {
         }
     }
 
+    /// Reads a program from filepath to memory.
     pub fn read_program(&mut self, filepath: String) -> std::result::Result<(), String> {
         let mut buffer = Vec::<u8>::new();
         match File::open(filepath) {
@@ -76,13 +77,13 @@ impl CPU {
             }
         }
     }
-
+    /// Fetch the next Opcode and increment program counter.
     pub fn fetch(&mut self) -> Opcode {
         let op = Opcode{op: ((self.memory[self.pc] as u16) << 8) | (self.memory[self.pc+1] as u16)};
         self.pc += 2;
         return op;
     }
-
+    /// Execute an opcode.
     pub fn execute(&mut self, opcode: Opcode) {
         match opcode.opcode() {
             0x0 => {
