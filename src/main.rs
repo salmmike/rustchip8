@@ -1,4 +1,4 @@
-use piston::{EventLoop, UpdateEvent, RenderEvent};
+use piston::{EventLoop, UpdateEvent, RenderEvent, PressEvent, ReleaseEvent};
 use rustchip8::{CPU, Opcode};
 use std::env;
 
@@ -52,6 +52,14 @@ fn main() {
 
             if let Some(ref args) = e.render_args() {
                 cpu.peripherals.draw(args, &mut gl);
+            }
+
+            if let Some(ref args) = e.press_args() {
+                cpu.peripherals.set_key(&args);
+            }
+
+            if let Some(ref args) = e.release_args() {
+                cpu.peripherals.release_key(&args);
             }
         }
 }

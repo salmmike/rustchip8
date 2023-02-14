@@ -322,7 +322,22 @@ impl CPU {
     }
 
     fn op_0xe(&mut self, opcode: Opcode) {
-        println!("OP code: {}", opcode.opcode());
+        match opcode.nn() {
+            0x9E => {
+                if self.peripherals.key_states[self.v[opcode.x() as usize] as usize] {
+                    self.pc += 2;
+                }
+            }
+            0xA1 => {
+                if !self.peripherals.key_states[self.v[opcode.x() as usize] as usize] {
+                    self.pc += 2;
+                }
+            }
+            _ => {
+                println!("Not implemented")
+            }
+
+        }
     }
 
     fn op_0xf(&mut self, opcode: Opcode) {
@@ -340,7 +355,13 @@ impl CPU {
                 self.i += self.v[opcode.x()] as u16;
             }
             0x0A => {
-                println!("Not implemented")
+                for n in 0..0xF as usize {
+                    if self.peripherals.key_states[n] {
+                        self.v[opcode.x() as usize] = n as u8;
+                        return;
+                    }
+                }
+                self.pc -= 2;
             }
             0x29 => {
                 self.i = (0x50 + opcode.x() * 5).try_into().unwrap();
