@@ -1,8 +1,10 @@
 mod peripherals;
 use peripherals::Peripherals;
+use rand::rngs::ThreadRng;
 
 use std::fs::File;
 use std::io::prelude::*;
+use rand::Rng;
 
 pub struct Opcode {
     pub op: u16
@@ -41,6 +43,7 @@ pub struct CPU {
     pub delay_timer: u8,
     pub sound_timer: u8,
     pub peripherals: Peripherals,
+    pub rnd: ThreadRng,
 }
 
 impl CPU {
@@ -54,6 +57,7 @@ impl CPU {
             delay_timer: 0,
             sound_timer: 0,
             peripherals: Peripherals::new(),
+            rnd: rand::thread_rng(),
         };
         cpu.add_fonts();
         cpu
@@ -299,11 +303,12 @@ impl CPU {
     }
 
     fn op_0xb(&mut self, opcode: Opcode) {
-        println!("OP code: {}", opcode.opcode());
+        self.pc = (opcode.nnn() + (self.v[0] as u16)) as usize;
     }
 
     fn op_0xc(&mut self, opcode: Opcode) {
-        println!("OP code: {}", opcode.opcode());
+        let rndnum: u8 = self.rnd.gen();
+        self.v[opcode.x()] = opcode.nn() & rndnum;
     }
 
     fn op_0xd(&mut self, opcode: Opcode) {
