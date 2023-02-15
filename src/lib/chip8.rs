@@ -35,15 +35,15 @@ impl Opcode {
 }
 
 pub struct CPU {
-    pub pc: usize,
-    pub i: u16,
-    pub v: Vec<u8>,
-    pub memory: Vec<u8>,
-    pub stack: Vec<u16>,
-    pub delay_timer: u8,
-    pub sound_timer: u8,
+    pc: usize,
+    i: u16,
+    v: Vec<u8>,
+    memory: Vec<u8>,
+    stack: Vec<u16>,
+    delay_timer: u8,
+    sound_timer: u8,
     pub peripherals: Peripherals,
-    pub rnd: ThreadRng,
+    rnd: ThreadRng,
 }
 
 impl CPU {
@@ -114,10 +114,10 @@ impl CPU {
         }
     }
 
-    fn overflow_add(&self, a: u8, b: u8) -> u8 {
+    pub fn overflow_add(&self, a: u8, b: u8) -> u8 {
         (((a as u16 + b as u16)) % (u8::MAX as u16 + 1)) as u8
     }
-    fn overflow_subtract(&self, a: u8, b: u8) -> u8 {
+    pub fn overflow_subtract(&self, a: u8, b: u8) -> u8 {
         (((a as i16 - b as i16)) & (0xFF)) as u8
     }
 
@@ -392,6 +392,4 @@ impl CPU {
             }
         }
     }
-
-
 }
